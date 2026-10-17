@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "proto-broker",
+  "name": "protobroker",
   "main": "src/worker.ts",
   "compatibility_date": "2026-10-16",
   "compatibility_flags": ["nodejs_compat"],
@@ -19,7 +19,7 @@
     // `npx wrangler deploy --env production`. Self-hosters use the default
     // config above and never touch this block.
     "production": {
-      "name": "proto-broker",
+      "name": "protobroker",
       "routes": [{ "pattern": "proto.broker", "custom_domain": true }],
       "workers_dev": false,
       "preview_urls": false,

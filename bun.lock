@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "proto-broker",
+      "name": "protobroker",
       "dependencies": {
         "hono": "^4.13.13",
       },

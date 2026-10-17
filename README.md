@@ -92,8 +92,8 @@ The `production` environment in `wrangler.jsonc` is the public instance at proto
 ### Docker
 
 ```sh
-docker build -t proto-broker .
-docker run -p 8787:8787 -e PUBLIC_URL=https://broker.example.com proto-broker
+docker build -t protobroker .
+docker run -p 8787:8787 -e PUBLIC_URL=https://broker.example.com protobroker
 ```
 
 The image runs the same app on Bun. Put it behind any HTTPS reverse proxy.
