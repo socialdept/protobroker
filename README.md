@@ -1,14 +1,18 @@
 # proto.broker
 
-Client metadata for atproto OAuth local development. Point your app at a `.test` or `localhost` callback and test the real OAuth flow, confidential clients included.
+Run confidential AT Protocol OAuth clients on local domains without a tunnel.
+
+Your app on `https://app.test` gets a real confidential client: `private_key_jwt` client authentication, signed client assertions and confidential-client session lifetimes, exactly as it will run in production. No tunnel, no deploy, no account.
 
 It is stateless. Everything a client needs is encoded in the client id itself, so the service has no database and holds no secrets.
 
 ## Why it exists
 
-An atproto authorization server fetches your client metadata from a public HTTPS URL. It also refuses redirect URIs on local domains such as `.test`, `.local` and `.localhost`. An app running on your machine can do neither.
+A confidential client needs its metadata on a public HTTPS URL, because the authorization server fetches it from there. Authorization servers also refuse redirects to local domains such as `.test`, `.local` and `.localhost`. An app running on your machine can do neither.
 
-The loopback client (`client_id=http://localhost`) works around this, but only as a public client with `127.0.0.1` redirects. proto.broker lets a local app run as a full confidential client with `private_key_jwt`, the same way it will in production.
+Until now that left two options. Expose your machine through a tunnel, or develop as a loopback public client, with no client authentication and sessions capped at two weeks, and only find out how the confidential flow behaves after you deploy.
+
+proto.broker hosts the metadata and relays the callback, so the confidential flow you test locally is the one you ship.
 
 ## How it works
 
@@ -26,7 +30,9 @@ Clients never expire and there is nothing to revoke. To rotate, generate a new k
 bun run client --callback https://app.test/oauth/callback --scope "atproto transition:generic" --name "My app"
 ```
 
-This prints the `client_id`, the `redirect_uri`, the `kid` and a PEM private key for your app's config. Add `--public` for a public client with no key.
+This prints the `client_id`, the `redirect_uri`, the `kid` and a PEM private key for your app's config.
+
+A public client with no key is also possible with `--public`, but a loopback client already covers that case without a broker.
 
 Client assertions must carry the printed `kid`, which is the RFC 7638 thumbprint of the public key unless you set one in the blob.
 
