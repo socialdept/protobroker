@@ -1,0 +1,105 @@
+# proto.broker
+
+Client metadata for atproto OAuth local development. Point your app at a `.test` or `localhost` callback and test the real OAuth flow, confidential clients included.
+
+It is stateless. Everything a client needs is encoded in the client id itself, so the service has no database and holds no secrets.
+
+## Why it exists
+
+An atproto authorization server fetches your client metadata from a public HTTPS URL. It also refuses redirect URIs on local domains such as `.test`, `.local` and `.localhost`. An app running on your machine can do neither.
+
+The loopback client (`client_id=http://localhost`) works around this, but only as a public client with `127.0.0.1` redirects. proto.broker lets a local app run as a full confidential client with `private_key_jwt`, the same way it will in production.
+
+## How it works
+
+1. You generate a P-256 keypair locally. The private key never leaves your machine.
+2. Your public key, callback URL and scopes are encoded into the client id:
+   `https://proto.broker/v1/<blob>`
+3. The authorization server fetches that URL and gets your client metadata, with the public key inline as `jwks`.
+4. After the user consents, the authorization server redirects to `https://proto.broker/v1/<blob>/callback`, which sends the browser on to your local callback with `code`, `state` and `iss` intact.
+
+Clients never expire and there is nothing to revoke. To rotate, generate a new key, which gives you a new client id.
+
+## Create a client
+
+```sh
+bun run client --callback https://app.test/oauth/callback --scope "atproto transition:generic" --name "My app"
+```
+
+This prints the `client_id`, the `redirect_uri`, the `kid` and a PEM private key for your app's config. Add `--public` for a public client with no key.
+
+Client assertions must carry the printed `kid`, which is the RFC 7638 thumbprint of the public key unless you set one in the blob.
+
+## Blob format (v1)
+
+The blob is unpadded base64url of a JSON object with short keys:
+
+| Key | Required | Meaning |
+| --- | --- | --- |
+| `c` | yes | Callback URL the broker redirects to |
+| `s` | yes | OAuth scope string. Must include `atproto` |
+| `n` | no | Client name shown on the consent screen |
+| `k` | no | Public P-256 key as `{ "x": "...", "y": "..." }`. Omit for a public client |
+| `i` | no | Key id. Defaults to the RFC 7638 thumbprint of `k` |
+
+Unknown keys are rejected. Any language can build a client id with a JSON encoder and base64url.
+
+## Endpoints
+
+| Route | Response |
+| --- | --- |
+| `GET /v1/:blob` | Client metadata JSON |
+| `GET /v1/:blob/callback` | 302 to the encoded callback, query string forwarded |
+| `GET /health` | `{ "ok": true }` |
+| `GET /` | Landing page |
+
+Invalid clients get a 400 with `{ "error": "InvalidClient", "message": "..." }`.
+
+## Security model
+
+- The broker only redirects to allowed hosts. The public instance allows local development hosts only: `localhost`, `127.0.0.1`, `[::1]`, `*.test`, `*.localhost` and `*.local`. A crafted client can therefore only send an authorization code back to the machine of the person who approved it.
+- No private keys, tokens or codes are stored. Codes pass through a redirect with `Cache-Control: no-store` and `Referrer-Policy: no-referrer`.
+- The public key is checked to be a valid P-256 point before it is published.
+
+## Self-hosting
+
+There are two settings, both optional:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `ALLOWED_CALLBACK_HOSTS` | `localhost,127.0.0.1,[::1],*.test,*.localhost,*.local` | Comma-separated hosts the broker redirects to. Exact hosts or `*.suffix`. A bare `*` is ignored |
+| `PUBLIC_URL` | the request origin | Origin client ids are minted under. Set it when running behind a proxy |
+
+Widening the allowlist, for example to `*.staging.example.com`, lets a staging site behind basic auth use the broker too.
+
+### Cloudflare Workers
+
+```sh
+bun install
+bunx wrangler deploy
+```
+
+Settings live in `wrangler.jsonc` under `vars`. Add a custom domain in the Cloudflare dashboard or with a `routes` entry.
+
+### Docker
+
+```sh
+docker build -t proto-broker .
+docker run -p 8787:8787 -e PUBLIC_URL=https://broker.example.com proto-broker
+```
+
+The image runs the same app on Bun. Put it behind any HTTPS reverse proxy.
+
+## Development
+
+```sh
+bun install
+bun test           # unit and route tests, including Bluesky's own metadata validators
+bun run typecheck  # Worker and Bun builds
+bun run dev        # wrangler dev
+bun run start      # Bun server on :8787
+```
+
+## License
+
+MIT

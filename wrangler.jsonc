@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "proto-broker",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-16",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    // Hosts the broker will redirect callbacks to. Exact hosts or "*.suffix".
+    "ALLOWED_CALLBACK_HOSTS": "localhost,127.0.0.1,[::1],*.test,*.localhost,*.local",
+    // Origin client ids are minted under. Empty means the request origin.
+    "PUBLIC_URL": ""
+  }
+}

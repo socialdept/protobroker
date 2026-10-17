@@ -1,0 +1,26 @@
+{
+  "name": "proto-broker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Stateless client metadata host for atproto OAuth local development",
+  "license": "MIT",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "start": "bun run src/server.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.bun.json",
+    "types": "wrangler types",
+    "client": "bun run scripts/client.ts"
+  },
+  "dependencies": {
+    "hono": "^4.13.13"
+  },
+  "devDependencies": {
+    "@atproto/oauth-types": "^0.7.7",
+    "@types/bun": "^1.4.3",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.151.1"
+  }
+}
