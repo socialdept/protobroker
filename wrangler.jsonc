@@ -13,5 +13,20 @@
     "ALLOWED_CALLBACK_HOSTS": "localhost,127.0.0.1,[::1],*.test,*.localhost,*.local",
     // Origin client ids are minted under. Empty means the request origin.
     "PUBLIC_URL": ""
+  },
+  "env": {
+    // The public instance at proto.broker, deployed by Workers Builds with
+    // `npx wrangler deploy --env production`. Self-hosters use the default
+    // config above and never touch this block.
+    "production": {
+      "name": "proto-broker",
+      "routes": [{ "pattern": "proto.broker", "custom_domain": true }],
+      "workers_dev": false,
+      "preview_urls": false,
+      "vars": {
+        "ALLOWED_CALLBACK_HOSTS": "localhost,127.0.0.1,[::1],*.test,*.localhost,*.local",
+        "PUBLIC_URL": "https://proto.broker"
+      }
+    }
   }
 }
