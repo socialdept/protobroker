@@ -85,7 +85,9 @@ bun install
 bunx wrangler deploy
 ```
 
-Settings live in `wrangler.jsonc` under `vars`. Add a custom domain in the Cloudflare dashboard or with a `routes` entry.
+Settings live in `wrangler.jsonc` under `vars`. The default config deploys to your `workers.dev` subdomain.
+
+The `production` environment in `wrangler.jsonc` is the public instance at proto.broker, deployed with `wrangler deploy --env production`. To run your own on a custom domain, copy that block and change the `routes` pattern and `PUBLIC_URL` to your hostname.
 
 ### Docker
 
