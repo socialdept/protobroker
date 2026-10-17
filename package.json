@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Stateless client metadata host for atproto OAuth local development",
+  "description": "Run confidential AT Protocol OAuth clients on local domains without a tunnel",
   "license": "MIT",
   "scripts": {
     "dev": "wrangler dev",

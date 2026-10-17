@@ -7,7 +7,7 @@ export function landingPage(origin: string) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>proto.broker</title>
-    <meta name="description" content="Stateless client metadata for atproto OAuth local development." />
+    <meta name="description" content="Run confidential AT Protocol OAuth clients on local domains without a tunnel." />
     <style>
       :root {
         --bg: #fafaf9;
@@ -37,6 +37,7 @@ export function landingPage(origin: string) {
       h1 { font-size: 28px; margin: 0 0 8px; }
       h2 { font-size: 18px; margin: 40px 0 8px; }
       p, li { color: var(--muted); }
+      .lead { color: var(--fg); font-size: 19px; }
       code, pre { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code); }
       code { padding: 2px 6px; border-radius: 4px; }
       pre { padding: 16px; border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
@@ -46,16 +47,18 @@ export function landingPage(origin: string) {
   <body>
     <main>
       <h1>proto.broker</h1>
-      <p>Client metadata for atproto OAuth local development. Point your app at a <code>.test</code> or <code>localhost</code> callback and test the real OAuth flow, confidential clients included.</p>
+      <p class="lead">Run confidential AT Protocol OAuth clients on local domains without a tunnel.</p>
+      <p>Your app on <code>https://app.test</code> gets a real confidential client: <code>private_key_jwt</code> client authentication, signed client assertions and confidential-client session lifetimes, exactly as it will run in production. No tunnel, no deploy, no account.</p>
 
       <h2>Why it exists</h2>
-      <p>An authorization server fetches your client metadata from a public HTTPS URL, and it refuses redirects to local domains like <code>.test</code>. A local app can do neither, so this service does both for it.</p>
+      <p>A confidential client needs its metadata on a public HTTPS URL, and authorization servers refuse redirects to local domains like <code>.test</code>. An app on your machine can do neither, so until now the choice was a tunnel, or developing as a public client and finding out how the confidential flow behaves after you deploy.</p>
+      <p>proto.broker hosts the metadata and relays the callback, so the confidential flow you test locally is the one you ship.</p>
 
       <h2>How it works</h2>
       <ol>
         <li>You generate a P-256 keypair locally. The private key never leaves your machine.</li>
         <li>Your public key, callback and scopes are encoded into the client id itself, so this service stores nothing.</li>
-        <li>The authorization server fetches <code>${origin}/v1/&lt;blob&gt;</code> and gets your metadata.</li>
+        <li>The authorization server fetches <code>${origin}/v1/&lt;blob&gt;</code> and gets your metadata, public key included.</li>
         <li>After consent it redirects to <code>${origin}/v1/&lt;blob&gt;/callback</code>, which sends you on to your local app.</li>
       </ol>
 
@@ -64,7 +67,7 @@ export function landingPage(origin: string) {
       <p>Callbacks are limited to local development hosts on this instance, so a client can only ever send a code back to the machine that approved it.</p>
 
       <h2>Self-hosting</h2>
-      <p>It runs as a Cloudflare Worker or as a Bun server in Docker, with no database. See the README for setup and for widening the allowed callback hosts.</p>
+      <p>It runs as a Cloudflare Worker or as a Bun server in Docker, with no database. See the <a href="https://github.com/socialdept/protobroker">README</a> for setup and for widening the allowed callback hosts.</p>
     </main>
   </body>
 </html>`
